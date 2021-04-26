@@ -134,6 +134,7 @@
     <ClCompile Include="idrv\rtcore.cpp" />
     <ClCompile Include="idrv\winring0.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mf.cpp" />
     <ClCompile Include="kduprov.cpp" />
     <ClCompile Include="pagewalk.cpp" />
     <ClCompile Include="ps.cpp" />

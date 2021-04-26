@@ -81,6 +81,9 @@
     <ClCompile Include="dsefix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="idrv\phymem.cpp">
       <Filter>Source Files\idrv</Filter>
     </ClCompile>

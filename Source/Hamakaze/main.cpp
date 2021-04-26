@@ -28,6 +28,7 @@ volatile LONG g_lApplicationInstances = 0;
 #define CMD_MAP         L"-map"
 #define CMD_SCV         L"-scv"
 #define CMD_PS          L"-ps"
+#define CMD_MF          L"-mf"
 #define CMD_DSE         L"-dse"
 #define CMD_LIST        L"-list"
 #define CMD_COMPRESS    L"-compress"
@@ -43,6 +44,7 @@ volatile LONG g_lApplicationInstances = 0;
                      "kdu -list         - list available providers\r\n"\
                      "kdu -prv id       - optional, sets provider id to be used with rest of commands, default 0\r\n"\
                      "kdu -ps pid       - disable ProtectedProcess for given pid\r\n"\
+                     "kdu -mf pid       - show MitigationFlags for given pid\r\n"\
                      "kdu -dse value    - write user defined value to the system DSE state flags\r\n"\
                      "kdu -map filename - map driver to the kernel and execute it entry point, this command have dependencies listed below\r\n"\
                      "-scv version      - optional, select shellcode version, default 1\r\n"\
@@ -78,6 +80,38 @@ INT KDUProcessPSObjectSwitch(
 
     if (provContext) {
         retVal = KDUControlProcess(provContext, ProcessId);
+        KDUProviderRelease(provContext);
+    }
+
+    return retVal;
+}
+
+/*
+* KDUProcessPSObjectSwitch
+*
+* Purpose:
+*
+* Handle -mf switch.
+*
+*/
+INT KDUMitigationFlagsSwitch(
+    _In_ ULONG HvciEnabled,
+    _In_ ULONG NtBuildNumber,
+    _In_ ULONG ProviderId,
+    _In_ ULONG_PTR ProcessId
+)
+{
+    INT retVal = 0;
+    KDU_CONTEXT* provContext;
+
+    provContext = KDUProviderCreate(ProviderId,
+        HvciEnabled,
+        NtBuildNumber,
+        KDU_SHELLCODE_NONE,
+        ActionTypeDKOM);
+
+    if (provContext) {
+        retVal = KDURemoveProcessMFs(provContext, ProcessId);
         KDUProviderRelease(provContext);
     }
 
@@ -454,12 +488,31 @@ INT KDUProcessCommandLine(
                         processId);
                 }
 
-                else {
+                else 
                     //
-                    // Nothing set, show help.
+                    // Check if -mf specified.
                     //
-                    printf_s(T_PRNTDEFAULT, T_KDUUSAGE);
-                }
+                    if (supGetCommandLineOption(CMD_MF,
+                        TRUE,
+                        szParameter,
+                        sizeof(szParameter) / sizeof(WCHAR),
+                        NULL))
+                    {
+                        processId = strtou64(szParameter);
+
+                        retVal = KDUMitigationFlagsSwitch(HvciEnabled,
+                            NtBuildNumber,
+                            providerId,
+                            processId);
+                        
+                    }
+
+                    else {
+                        //
+                        // Nothing set, show help.
+                        //
+                        printf_s(T_PRNTDEFAULT, T_KDUUSAGE);
+                    }
 
     } while (FALSE);
 

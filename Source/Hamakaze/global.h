@@ -74,6 +74,7 @@ extern "C" {
 #include "pagewalk.h"
 #include "dsefix.h"
 #include "tests.h"
+#include "mf.h"
 
 #define ASSERT_RESOLVED_FUNC(FunctionPtr) { if (FunctionPtr == 0) break; }
 #define ASSERT_RESOLVED_FUNC_ABORT(FunctionPtr) { if (FunctionPtr == 0) return FALSE; }
